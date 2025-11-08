@@ -19,7 +19,7 @@ nodes:
         node-labels: "node-id=workernode1"
       taints:
       - key: "app"
-        value: "kubesense"
+        value: "kubesamosa"
         effect: "NoSchedule"
 - role: worker
   labels:
@@ -32,6 +32,6 @@ nodes:
         node-labels: "node-id=workernode2"
       taints:
       - key: "app"
-        value: "kubesense"
+        value: "kubesamosa"
         effect: "NoSchedule"
 ```
