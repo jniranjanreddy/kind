@@ -73,3 +73,18 @@ export INGRESS_IP=$(kubectl get svc istio-ingressgateway -n istio-system -o json
 echo "http://${INGRESS_IP}/productpage"
 
 ```
+## get kubeconfig
+```
+kind get kubeconfig --name airflow-3x > kind-airflow.yaml
+kubectl --kubeconfig kind-airflow.yaml get pods -A
+NAMESPACE            NAME                                               READY   STATUS    RESTARTS        AGE
+kube-system          coredns-674b8bbfcf-vjp9c                           1/1     Running   0               4m32s
+kube-system          coredns-674b8bbfcf-z47w7                           1/1     Running   0               4m32s
+kube-system          etcd-airflow-3x-control-plane                      1/1     Running   0               4m36s
+kube-system          kindnet-xsc9x                                      1/1     Running   0               4m32s
+kube-system          kube-apiserver-airflow-3x-control-plane            1/1     Running   0               4m36s
+kube-system          kube-controller-manager-airflow-3x-control-plane   1/1     Running   0               4m36s
+kube-system          kube-proxy-zq5bp                                   1/1     Running   5 (2m53s ago)   4m32s
+kube-system          kube-scheduler-airflow-3x-control-plane            1/1     Running   0               4m36s
+local-path-storage   local-path-provisioner-7dc846544d-pfp9k            1/1     Running   5 (112s ago)    4m32s
+```
