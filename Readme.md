@@ -48,3 +48,10 @@ if any issues
 sudo chmod 666 /var/run/docker.sock
 
 ```
+## if you see bel;ow problem, this is the fix.
+```
+sysctl fs.inotify.max_user_instances=512
+cat /etc/sysctl.conf
+fs.inotify.max_user_instances=512
+fs.inotify.max_user_watches=524288
+```
