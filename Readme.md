@@ -35,3 +35,16 @@ nodes:
         value: "kubesamosa"
         effect: "NoSchedule"
 ```
+## How to add new for kind
+```
+1. create user
+     sudo useradd -m airflow
+2. add to docker group
+    sudo usermod -aG docker airflow
+3. add to cat /etc/sudoers
+
+
+if any issues
+sudo chmod 666 /var/run/docker.sock
+
+```
