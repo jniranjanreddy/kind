@@ -55,3 +55,9 @@ cat /etc/sysctl.conf
 fs.inotify.max_user_instances=512
 fs.inotify.max_user_watches=524288
 ```
+
+How to get kubeconfig from Kind cluster
+```
+kind get kubeconfig --name my-kind-cluster > filename
+
+```
