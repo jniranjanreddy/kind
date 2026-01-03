@@ -82,3 +82,7 @@ SESSION_COOKIE_SECURE = False" --dry-run=client -o yaml | kubectl apply -f -
 kubectl rollout status deployment airflow-api-server -n airflow
 
 ```
+## to set useranme and password
+```
+kubectl exec -it airflow-scheduler-8566c5bb8c-abc123 -n airflow -c scheduler -- airflow users create --username admin --firstname Admin --lastname User --role Admin --email admin@example.com --password admin
+```
