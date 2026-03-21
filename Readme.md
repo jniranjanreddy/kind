@@ -1,5 +1,14 @@
 ## two node cluster
 
+## how to install KIND
+```
+[ $(uname -m) = x86_64 ] && curl -Lo ./kind https://kind.sigs.k8s.io/dl/v0.31.0/kind-linux-amd64
+chmod +x kind
+mv kind /usr/local/bin.
+kind --version
+
+kind create cluster --name test01
+```
 ```
 cat kind-config.yaml
 kind: Cluster
