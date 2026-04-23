@@ -1,0 +1,43 @@
+# This file is used to configure the PostgreSQL instance for the Temporal cluster.
+# It is used to configure the PostgreSQL instance for the Temporal cluster.
+# It is used to configure the PostgreSQL instance for the Temporal cluster.
+
+
+architecture: standalone
+
+auth:
+  username: devops
+  password: password
+  database: temporal
+
+primary:
+  persistence:
+    enabled: true
+    storageClass: temporal-standardssd-retain
+    size: 5Gi
+
+  podAnnotations:
+    backup.velero.io/backup-volumes: data
+
+  resources:
+    requests:
+      cpu: 250m
+      memory: 512Mi
+    limits:
+      cpu: 1
+      memory: 2Gi
+
+  podAntiAffinityPreset: soft
+
+  nodeSelector:
+    pool: temporal
+    workload: temporal
+
+  tolerations:
+    - key: workload
+      operator: Equal
+      value: temporal
+      effect: NoSchedule
+
+volumePermissions:
+  enabled: true
