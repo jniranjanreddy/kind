@@ -1,0 +1,128 @@
+#This file is used to deploy Temporal in KIND Kubernetes cluster.
+# this file pass the values for Temporal
+# this is a Kind cluster so TLS is disables
+# If Temporal unable to connect to postgress, you dont see any pods running.
+
+server:
+  replicaCount: 1
+
+  nodeSelector:
+    pool: temporal
+    workload: temporal
+
+  tolerations:
+    - key: workload
+      operator: Equal
+      value: temporal
+      effect: NoSchedule
+
+  affinity:
+    podAntiAffinity:
+      preferredDuringSchedulingIgnoredDuringExecution:
+        - weight: 100
+          podAffinityTerm:
+            topologyKey: kubernetes.io/hostname
+            labelSelector:
+              matchLabels:
+                app.kubernetes.io/instance: temporal
+  frontend:
+    replicaCount: 2
+    # Istio: appProtocol must be grpc (not chart default tcp). Keep port explicit for safe Helm merge.
+    # 
+    service:
+      port: 7233
+      appProtocol: grpc
+  history:
+    replicaCount: 1
+
+  matching:
+    replicaCount: 1
+
+  worker:
+    replicaCount: 1
+
+  config:
+    persistence:
+      defaultStore: default
+      visibilityStore: visibility
+      # Cannot be changed after the first cluster deploy — pick intentionally.
+      # check pod logs
+      numHistoryShards: 512
+      datastores:
+        default:
+          sql:
+            # Postgress credentials are critical, make its correct in postgres yaml file and temporal files
+            # Empty server: create DBs and apply SQL schema on startup. For stricter prod, use false + Helm schema job / sql-tool.
+            createDatabase: true
+            manageSchema: true
+            pluginName: postgres12
+            databaseName: temporal
+            connectAddr: "temporal-postgres-postgresql.temporal.svc.cluster.local:5432"
+            connectProtocol: tcp
+            user:  temporal
+            password: password
+            maxConns: 20
+            maxIdleConns: 20
+            maxConnLifetime: "1h"
+            # Azure PostgreSQL Flexible Server rejects non-TLS clients (pg_hba "no encryption").
+            tls:
+              #enabled: true # for azute it should be true
+              enabled: false
+              enableHostVerification: false
+        # Visibility schema is versioned separately. If logs say Expected … 1.13 vs Actual … 1.1, the server exits before manageSchema can run — drop/recreate DB temporal_visibility (dev) or run temporal-sql-tool update-schema for visibility, then restart pods.
+        visibility:
+          sql:
+            createDatabase: true
+            manageSchema: true
+            pluginName: postgres12
+            databaseName: temporal_visibility
+            connectAddr: "temporal-postgres-postgresql.temporal.svc.cluster.local:5432"
+            connectProtocol: tcp
+            user: temporal
+            password: password
+            maxConns: 20
+            maxIdleConns: 20
+            maxConnLifetime: "1h"
+            tls:
+              enabled: false
+              enableHostVerification: false
+
+  resources:
+    requests:
+      cpu: 500m
+      memory: 1Gi
+    limits:
+      cpu: 1
+      memory: 2Gi
+
+# Schedule web and admintools on temporal pool (pool + workload labels, workload taint)
+web:
+  nodeSelector:
+    pool: temporal
+    workload: temporal
+  tolerations:
+    - key: workload
+      operator: Equal
+      value: temporal
+      effect: NoSchedule
+
+admintools:
+  nodeSelector:
+    pool: temporal
+    workload: temporal
+  tolerations:
+    - key: workload
+      operator: Equal
+      value: temporal
+      effect: NoSchedule
+
+# Schema job (runs on same node pool; template uses schema.* with fallback to admintools.*)
+schema:
+  nodeSelector:
+    pool: temporal
+    workload: temporal
+  tolerations:
+    - key: workload
+      operator: Equal
+      value: temporal
+      effect: NoSchedule
