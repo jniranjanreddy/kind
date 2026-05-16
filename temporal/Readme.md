@@ -8,11 +8,14 @@
 ```
 1. create rancher storage
    1.1 kubectl create namespace temporal
-   1.2 k apply -f kind-temporal-storageclass.yaml
+   1.2 k apply -f kind-storageclass.yaml
    1.3 helm repo add bitnami https://charts.bitnami.com/bitnami
    1.4 helm repo update
 
-2. Install Postgress - need postgres-values.yaml for helm, 
+2. Install Postgress - need postgres-values.yaml for helm,
+   helm install temporal-postgres bitnami/postgresql -n temporal -f postgres-values.yaml
+
+   #Optional
    helm install temporal-postgres bitnami/postgresql \
   --set primary.persistence.enabled=false \
   --set primary.nodeSelector=null \
@@ -22,10 +25,10 @@
    kubectl exec -it temporal-postgres-postgresql-0 -n temporal -- env PGPASSWORD="password" psql -U temporal -c "CREATE DATABASE temporal;" #
    kubectl exec -it temporal-postgres-postgresql-0 -n temporal -- env PGPASSWORD="strongpassword" psql -U temporal -c "CREATE DATABASE temporal_visibility;"
 
-   kubectl exec -it temporal-postgres-postgresql-0 -n temporal -- env PGPASSWORD="strongpassword" psql -U temporal -c "CREATE EXTENSION IF NOT EXISTS btree_gin;"
-   kubectl exec -it temporal-postgres-postgresql-0 -n temporal -- env PGPASSWORD="strongpassword" psql -U temporal -c "CREATE EXTENSION IF NOT EXISTS pg_trgm;"
-   kubectl exec -it temporal-postgres-postgresql-0 -n temporal -- env PGPASSWORD="strongpassword" psql -U temporal -c "CREATE EXTENSION IF NOT EXISTS uuid-ossp;"
-   kubectl exec -it temporal-postgres-postgresql-0 -n temporal -- env PGPASSWORD="strongpassword" psql -U temporal -c "CREATE EXTENSION IF NOT EXISTS pgcrypto;"
+   kubectl exec -it temporal-postgres-postgresql-0 -n temporal -- env PGPASSWORD="password" psql -U temporal -c "CREATE EXTENSION IF NOT EXISTS btree_gin;"
+   kubectl exec -it temporal-postgres-postgresql-0 -n temporal -- env PGPASSWORD="password" psql -U temporal -c "CREATE EXTENSION IF NOT EXISTS pg_trgm;"
+   kubectl exec -it temporal-postgres-postgresql-0 -n temporal -- env PGPASSWORD="password" psql -U temporal -c "CREATE EXTENSION IF NOT EXISTS uuid-ossp;"
+   kubectl exec -it temporal-postgres-postgresql-0 -n temporal -- env PGPASSWORD="password" psql -U temporal -c "CREATE EXTENSION IF NOT EXISTS pgcrypto;"
 
 ```
 ## Actual Temporal deployment.
