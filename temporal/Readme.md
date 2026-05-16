@@ -27,7 +27,7 @@
 
    kubectl exec -it temporal-postgres-postgresql-0 -n temporal -- env PGPASSWORD="password" psql -U temporal -c "CREATE EXTENSION IF NOT EXISTS btree_gin;"
    kubectl exec -it temporal-postgres-postgresql-0 -n temporal -- env PGPASSWORD="password" psql -U temporal -c "CREATE EXTENSION IF NOT EXISTS pg_trgm;"
-   kubectl exec -it temporal-postgres-postgresql-0 -n temporal -- env PGPASSWORD="password" psql -U temporal -c "CREATE EXTENSION IF NOT EXISTS uuid-ossp;"
+   kubectl exec -it temporal-postgres-postgresql-0 -n temporal -- env PGPASSWORD="password" psql -U temporal -c 'CREATE EXTENSION IF NOT EXISTS "uuid-ossp"';
    kubectl exec -it temporal-postgres-postgresql-0 -n temporal -- env PGPASSWORD="password" psql -U temporal -c "CREATE EXTENSION IF NOT EXISTS pgcrypto;"
 
 ```
@@ -44,10 +44,6 @@ kubectl exec -n temporal $(kubectl get pods -n temporal -l app.kubernetes.io/com
 ## End of Temporal deployment
 kubectl port-forward svc/temporal-web 8080:8080 -n temporal
 
-helm install temporal-postgres bitnami/postgresql \
-  --set primary.persistence.enabled=false \
-  --set primary.nodeSelector=null \
-  -n temporal
 ```
 ## Deploy Worker and workflow to see work.
 ```
