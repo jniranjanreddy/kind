@@ -2,8 +2,7 @@
 
 ## Label the nodes, so can simulate HPA.
 ```
-kubectl label node temporal-control-plane pool=temporal
-kubectl label node temporal-control-plane workload=temporal
+ kubectl label node temporal-worker pool=temporal workload=temporal
 ```
 ## Steps to install Temporal in KIND.
 ```
