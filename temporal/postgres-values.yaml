@@ -6,7 +6,7 @@
 architecture: standalone
 
 auth:
-  username: devops
+  username: temporal
   password: password
   database: temporal
 
