@@ -52,5 +52,6 @@ spec:
       type: Utilization
       value: "50"
 ```
+<img width="506" height="435" alt="image" src="https://github.com/user-attachments/assets/759f5d03-1a12-4216-be2e-dc852ce137e3" />
 
 
