@@ -1,0 +1,49 @@
+# Milvus standalone (single binary, embedded message queue — no Pulsar/Kafka
+# needed) sized for a local dev cluster that also runs other stacks.
+# Cluster (distributed) mode was considered but needs an external message
+# queue — Milvus's own officially-tested lightweight cluster config still
+# pulls in a ~7-pod Pulsar sub-cluster on top of Milvus's own proxy/
+# coordinator/data/query/streaming pods (~15+ pods total). Standalone mode
+# gives the same data-plane APIs and works identically with Attu, at a
+# fraction of the footprint (~4 pods), so that's what's deployed here.
+cluster:
+  enabled: false
+
+pulsarv3:
+  enabled: false
+
+etcd:
+  replicaCount: 1
+  persistence:
+    size: 2Gi
+  resources:
+    requests:
+      memory: 256Mi
+      cpu: 100m
+    limits:
+      memory: 512Mi
+      cpu: 250m
+
+minio:
+  mode: standalone
+  persistence:
+    size: 5Gi
+  resources:
+    requests:
+      memory: 256Mi
+      cpu: 100m
+    limits:
+      memory: 512Mi
+      cpu: 300m
+
+standalone:
+  persistence:
+    persistentVolumeClaim:
+      size: 5Gi
+  resources:
+    requests:
+      memory: 1Gi
+      cpu: 500m
+    limits:
+      memory: 2Gi
+      cpu: 1000m
