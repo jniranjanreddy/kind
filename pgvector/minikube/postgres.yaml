@@ -1,0 +1,86 @@
+# PostgreSQL + pgvector, single instance, sized for a local dev cluster.
+#
+# Uses the official pgvector/pgvector image, NOT a Bitnami Postgres image —
+# verified hands-on that Bitnami's build of the vector extension crashes
+# Postgres with "signal 4: Illegal instruction" when building an HNSW or
+# IVFFlat index on this host's CPU (Intel Meteor Lake w/ AVX-VNNI). The
+# official pgvector/pgvector image builds both index types successfully on
+# the same host. If you ever swap the image, re-test index creation before
+# trusting it against real data.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: pgvector-initdb
+data:
+  01-enable-vector.sql: |
+    CREATE EXTENSION IF NOT EXISTS vector;
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: pgvector
+  labels:
+    app: pgvector
+spec:
+  serviceName: pgvector
+  replicas: 1
+  selector:
+    matchLabels:
+      app: pgvector
+  template:
+    metadata:
+      labels:
+        app: pgvector
+    spec:
+      containers:
+        - name: postgres
+          image: pgvector/pgvector:0.8.6-pg17-trixie
+          ports:
+            - containerPort: 5432
+          env:
+            - name: POSTGRES_PASSWORD
+              value: "PgVectorDevPassword"
+            - name: POSTGRES_DB
+              value: vectordb
+            - name: PGDATA
+              value: /var/lib/postgresql/data/pgdata
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/postgresql/data
+            - name: initdb
+              mountPath: /docker-entrypoint-initdb.d
+          resources:
+            requests:
+              memory: 512Mi
+              cpu: 250m
+            limits:
+              memory: 1Gi
+              cpu: 500m
+          readinessProbe:
+            exec:
+              command: ["pg_isready", "-U", "postgres"]
+            initialDelaySeconds: 10
+            periodSeconds: 5
+      volumes:
+        - name: initdb
+          configMap:
+            name: pgvector-initdb
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: 2Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: pgvector
+spec:
+  selector:
+    app: pgvector
+  ports:
+    - port: 5432
+      targetPort: 5432
