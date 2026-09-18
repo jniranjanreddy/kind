@@ -1,0 +1,21 @@
+# MongoDB standalone (single Deployment, no replica set) sized for a local
+# dev cluster that also runs other stacks. Persistence uses the cluster's
+# default StorageClass (storageClass left unset).
+architecture: standalone
+useStatefulSet: false
+
+auth:
+  enabled: true
+  rootUser: root
+  rootPassword: "MongoDevPassword"
+
+persistence:
+  size: 2Gi
+
+resources:
+  requests:
+    memory: 512Mi
+    cpu: 250m
+  limits:
+    memory: 1Gi
+    cpu: 500m
