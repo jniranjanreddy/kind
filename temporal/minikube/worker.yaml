@@ -1,0 +1,24 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: temporal-worker
+  namespace: temporal
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: temporal-worker
+      app.kubernetes.io/component: worker
+      app.kubernetes.io/instance: temporal
+      app.kubernetes.io/name: temporal
+  template:
+    metadata:
+      labels:
+        app: temporal-worker
+        app.kubernetes.io/component: worker
+        app.kubernetes.io/instance: temporal
+        app.kubernetes.io/name: temporal
+    spec:
+      containers:
+      - name: worker
+        image: nirulabs/temporal-worker:latest

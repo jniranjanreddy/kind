@@ -1,0 +1,37 @@
+architecture: standalone
+
+auth:
+  username: temporal
+  password: strongpassword
+  database: temporal
+
+primary:
+  persistence:
+    enabled: true
+    storageClass: standard
+    size: 5Gi
+
+  podAnnotations:
+    backup.velero.io/backup-volumes: data
+
+  resources:
+    requests:
+      cpu: 250m
+      memory: 512Mi
+    limits:
+      cpu: 1
+      memory: 2Gi
+
+  podAntiAffinityPreset: soft
+
+  nodeSelector:
+    pool: temporal
+    workload: temporal
+
+  tolerations:
+    - key: workload
+      operator: Equal
+      value: temporal
+      effect: NoSchedule
+volumePermissions:
+  enabled: true
