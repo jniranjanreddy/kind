@@ -1,0 +1,74 @@
+# AKHQ: fuller-featured web UI for Kafka (topics, consumer groups, message
+# tailing/search, ACLs, schema registry, Kafka Connect, etc).
+# https://github.com/tchiotludo/akhq
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: akhq-config
+data:
+  application.yml: |
+    akhq:
+      connections:
+        my-cluster:
+          properties:
+            bootstrap.servers: "my-cluster-kafka-bootstrap:9092"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: akhq
+  labels:
+    app: akhq
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: akhq
+  template:
+    metadata:
+      labels:
+        app: akhq
+    spec:
+      containers:
+        - name: akhq
+          image: tchiotludo/akhq:latest
+          ports:
+            - containerPort: 8080
+          env:
+            - name: JAVA_OPTS
+              value: "-Xms256M -Xmx512M"
+          volumeMounts:
+            - name: config
+              mountPath: /app/application.yml
+              subPath: application.yml
+          resources:
+            requests:
+              memory: 384Mi
+              cpu: 100m
+            limits:
+              memory: 512Mi
+              cpu: 300m
+          readinessProbe:
+            # AKHQ doesn't expose /health without enabling Micronaut's
+            # management endpoints, so probe the UI root instead. Startup
+            # (JVM boot + Kafka connection) takes ~25-30s.
+            httpGet:
+              path: /
+              port: 8080
+            initialDelaySeconds: 30
+            periodSeconds: 5
+      volumes:
+        - name: config
+          configMap:
+            name: akhq-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: akhq
+spec:
+  selector:
+    app: akhq
+  ports:
+    - port: 8080
+      targetPort: 8080
