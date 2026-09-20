@@ -118,7 +118,7 @@ Open `https://localhost:8080` in a browser for the UI (accept the self-signed ce
 
 ```bash
 # Public repo — no auth needed
-argocd repo add https://github.com/<your-user>/<your-repo>.git
+argocd repo add https://github.com/jniranjanreddy/argocd-manifests.git
 
 # Private repo — HTTPS with a PAT
 argocd repo add https://github.com/<your-user>/<your-repo>.git \
@@ -133,10 +133,11 @@ argocd repo add git@github.com:<your-user>/<your-repo>.git \
 
 ```bash
 argocd app create my-app \
-  --repo https://github.com/<your-user>/<your-repo>.git \
-  --path k8s/manifests \
+  --repo https://github.com/jniranjanreddy/argocd-manifests.git \
+  --revision qa \
+  --path k8s/apps \
   --dest-server https://kubernetes.default.svc \
-  --dest-namespace default \
+  --dest-namespace apps \
   --sync-policy automated \
   --self-heal \
   --auto-prune
