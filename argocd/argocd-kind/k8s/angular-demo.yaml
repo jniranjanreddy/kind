@@ -24,7 +24,7 @@ spec:
     spec:
       containers:
         - name: angular-demo
-          image: jniranjanreddy/angular-demo:latest
+          image: nirulabs/angular-demo:latest
           imagePullPolicy: Always
           ports:
             - containerPort: 80
