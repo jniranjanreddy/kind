@@ -132,7 +132,7 @@ argocd repo add git@github.com:<your-user>/<your-repo>.git \
 ## Step 5 — Create an Application (CLI way)
 
 ```bash
-argocd app create my-app \
+argocd app create angular-demo \
   --repo https://github.com/jniranjanreddy/argocd-manifests.git \
   --revision qa \
   --path k8s/apps \
