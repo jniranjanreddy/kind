@@ -1,0 +1,54 @@
+# Initial deploy uses :latest since no image exists on Docker Hub until
+# https://github.com/jniranjanreddy/angular-demo's CI has run at least once
+# (push to main there + add its DOCKERHUB_USERNAME/DOCKERHUB_TOKEN secrets
+# first). Until then this pod sits in ImagePullBackOff — expected.
+#
+# For the actual GitOps demo (a manifest change driving a sync), switch
+# `image:` below to the specific `jniranjanreddy/angular-demo:<commit-sha>`
+# tag CI pushes, then commit + push this file to this branch.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: angular-demo
+  labels:
+    app: angular-demo
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: angular-demo
+  template:
+    metadata:
+      labels:
+        app: angular-demo
+    spec:
+      containers:
+        - name: angular-demo
+          image: jniranjanreddy/angular-demo:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 80
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 80
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          resources:
+            requests:
+              memory: 32Mi
+              cpu: 25m
+            limits:
+              memory: 64Mi
+              cpu: 100m
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: angular-demo
+spec:
+  selector:
+    app: angular-demo
+  ports:
+    - port: 80
+      targetPort: 80
