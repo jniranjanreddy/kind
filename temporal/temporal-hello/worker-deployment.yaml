@@ -1,19 +1,34 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: temporal-worker
+  name: patient-services
   namespace: temporal
+  labels:
+    app: patient-services
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: temporal-worker
+      app: patient-services
   template:
     metadata:
       labels:
-        app: temporal-worker
+        app: patient-services
     spec:
       containers:
-      - name: temporal-worker
-        image: temporal-worker:1.0
-        imagePullPolicy: Never
+        - name: worker
+          image: patient-services:0.1.0
+          imagePullPolicy: IfNotPresent # image is loaded into kind, not pulled
+          env:
+            - name: TEMPORAL_ADDRESS
+              value: temporal-frontend.temporal.svc.cluster.local:7233
+            - name: TEMPORAL_NAMESPACE
+              value: default
+            - name: TASK_QUEUE
+              value: patient-services
+          resources:
+            requests:
+              cpu: 50m
+              memory: 128Mi
+            limits:
+              memory: 256Mi
