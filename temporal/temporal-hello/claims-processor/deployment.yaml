@@ -1,23 +1,23 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: patient-services
+  name: claims-processor
   namespace: temporal
   labels:
-    app: patient-services
+    app: claims-processor
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: patient-services
+      app: claims-processor
   template:
     metadata:
       labels:
-        app: patient-services
+        app: claims-processor
     spec:
       containers:
         - name: worker
-          image: patient-services:0.1.0
+          image: claims-processor:0.1.1
           imagePullPolicy: IfNotPresent # image is loaded into kind, not pulled
           env:
             - name: TEMPORAL_ADDRESS
@@ -25,7 +25,7 @@ spec:
             - name: TEMPORAL_NAMESPACE
               value: default
             - name: TASK_QUEUE
-              value: patient-services
+              value: claims-processor
           resources:
             requests:
               cpu: 50m

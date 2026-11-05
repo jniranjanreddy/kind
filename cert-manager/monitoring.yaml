@@ -1,0 +1,57 @@
+# cert-manager metrics + certificate alerts for the VictoriaMetrics operator
+# (picked up by vmagent/vmalert, which select all namespaces). See README.md section 7.
+#
+# Let's Encrypt no longer sends expiry emails, so these alerts are the safety net.
+apiVersion: operator.victoriametrics.com/v1beta1
+kind: VMServiceScrape
+metadata:
+  name: cert-manager
+  namespace: cert-manager
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: cert-manager
+      app.kubernetes.io/component: controller
+  endpoints:
+    - port: http-metrics
+      interval: 60s
+      # keep the Certificate's own "namespace" label (e.g. istio-system)
+      honorLabels: true
+---
+apiVersion: operator.victoriametrics.com/v1beta1
+kind: VMRule
+metadata:
+  name: cert-manager
+  namespace: cert-manager
+spec:
+  groups:
+    - name: cert-manager
+      rules:
+        - alert: CertManagerAbsent
+          expr: absent(up{namespace="cert-manager"} == 1)
+          for: 10m
+          labels: { severity: critical }
+          annotations:
+            summary: cert-manager is not running or not being scraped. No certificate will be renewed.
+
+        - alert: CertificateNotReady
+          expr: max by (namespace, name) (certmanager_certificate_ready_status{condition=~"False|Unknown"}) == 1
+          for: 15m
+          labels: { severity: warning }
+          annotations:
+            summary: "Certificate {{ $labels.namespace }}/{{ $labels.name }} is not Ready"
+            description: "kubectl -n {{ $labels.namespace }} describe certificate {{ $labels.name }}"
+
+        - alert: CertificateRenewalOverdue
+          expr: (certmanager_certificate_expiration_timestamp_seconds - time()) < 21 * 86400
+          for: 1h
+          labels: { severity: warning }
+          annotations:
+            summary: "Certificate {{ $labels.namespace }}/{{ $labels.name }} expires in {{ $value | humanizeDuration }}; renewal (due 30 days before expiry) has been failing"
+
+        - alert: CertificateExpiringSoon
+          expr: (certmanager_certificate_expiration_timestamp_seconds - time()) < 7 * 86400
+          for: 10m
+          labels: { severity: critical }
+          annotations:
+            summary: "Certificate {{ $labels.namespace }}/{{ $labels.name }} expires in {{ $value | humanizeDuration }}"

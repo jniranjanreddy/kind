@@ -1,0 +1,39 @@
+# Let's Encrypt ClusterIssuers, DNS-01 via Cloudflare. See cert-manager/README.md.
+#
+# Needs Secret cert-manager/cloudflare-api-token-secret (key: api-token), created
+# by hand per cluster, never committed. The ACME account keys
+# (letsencrypt-*-account-key) are generated on first use.
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: letsencrypt-prod
+spec:
+  acme:
+    server: https://acme-v02.api.letsencrypt.org/directory
+    email: niranjan.jannapureddy@genzeon.com
+    privateKeySecretRef:
+      name: letsencrypt-prod-account-key
+    solvers:
+      - dns01:
+          cloudflare:
+            apiTokenSecretRef:
+              name: cloudflare-api-token-secret
+              key: api-token
+---
+# Staging: untrusted certificates, generous rate limits. Use it to test new clusters.
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: letsencrypt-staging
+spec:
+  acme:
+    server: https://acme-staging-v02.api.letsencrypt.org/directory
+    email: niranjan.jannapureddy@genzeon.com
+    privateKeySecretRef:
+      name: letsencrypt-staging-account-key
+    solvers:
+      - dns01:
+          cloudflare:
+            apiTokenSecretRef:
+              name: cloudflare-api-token-secret
+              key: api-token
